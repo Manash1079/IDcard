@@ -1,0 +1,1703 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CR80 ID Card Designer</title>
+
+<style>
+
+:root{
+  --card-w:53.98mm;
+  --card-h:85.60mm
+}
+
+*{
+  box-sizing:border-box
+}
+
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#eef1f5;
+  color:#111
+}
+
+.app{
+  display:grid;
+  grid-template-columns:330px 1fr;
+  min-height:100vh
+}
+
+.panel{
+  padding:18px;
+  background:#fff;
+  border-right:1px solid #d8dde5;
+  overflow:auto
+}
+
+h1{
+  font-size:20px;
+  margin:0 0 5px
+}
+
+.sub{
+  font-size:12px;
+  color:#666;
+  margin-bottom:18px
+}
+
+h2{
+  font-size:13px;
+  margin:18px 0 8px;
+  padding-bottom:6px;
+  border-bottom:1px solid #e5e7eb
+}
+
+label{
+  display:block;
+  font-size:11px;
+  font-weight:700;
+  margin:9px 0 4px
+}
+
+input,
+textarea{
+  width:100%;
+  padding:8px 9px;
+  border:1px solid #cdd3dc;
+  border-radius:6px;
+  font:12px Arial;
+  background:#fff
+}
+
+textarea{
+  min-height:55px;
+  resize:vertical
+}
+
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px
+}
+
+.btns{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:16px
+}
+
+button{
+  border:0;
+  border-radius:7px;
+  padding:10px;
+  font-weight:700;
+  cursor:pointer
+}
+
+.primary{
+  background:#111;
+  color:#fff
+}
+
+.secondary{
+  background:#e9edf2;
+  color:#111
+}
+
+.stage{
+  padding:30px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:22px;
+  overflow:auto
+}
+
+.instructions{
+  max-width:850px;
+  width:100%;
+  background:#fff;
+  border:1px solid #d8dde5;
+  border-radius:10px;
+  padding:12px 15px;
+  font-size:12px;
+  line-height:1.45
+}
+
+.cards{
+  display:flex;
+  gap:28px;
+  align-items:flex-start;
+  justify-content:center;
+  flex-wrap:wrap
+}
+
+
+/* =========================================================
+   SHEET / CARD
+   ========================================================= */
+
+.sheet{
+  background:transparent;
+  padding:0;
+  box-shadow:none;
+  border-radius:0;
+  border:0;
+  outline:0
+}
+
+.card{
+  width:var(--card-w);
+  height:var(--card-h);
+  background:#eaf3fa;
+  position:relative;
+  overflow:hidden;
+  border:0;
+  outline:0
+}
+
+
+/* =========================================================
+   LIGHT BLUE DOT PATTERN
+   ========================================================= */
+
+.card:before{
+  content:"";
+  position:absolute;
+  inset:0;
+
+  background-image:radial-gradient(
+    #b0c4de .55px,
+    transparent .55px
+  );
+
+  background-size:5px 5px;
+  opacity:.2;
+  pointer-events:none
+}
+
+
+/* =========================================================
+   BCPL WATERMARK
+   ========================================================= */
+
+.watermark{
+  position:absolute;
+
+  top:-2mm;
+  bottom:-2mm;
+  left:-5mm;
+  right:-5mm;
+
+  display:grid;
+
+  grid-template-columns:repeat(4,max-content);
+  grid-template-rows:repeat(60,max-content);
+
+  align-content:start;
+  justify-content:center;
+
+  column-gap:1mm;
+  row-gap:1mm;
+
+  padding:0;
+  margin:0;
+
+  opacity:.50;
+
+  font-size:9px;
+  font-weight:700;
+  color:#2946eb;
+
+  pointer-events:none;
+  user-select:none;
+
+  z-index:1;
+
+  line-height:1
+}
+
+.watermark span{
+  text-align:center;
+  white-space:nowrap;
+
+  padding:0;
+  margin:0;
+
+  letter-spacing:-.45px;
+  line-height:1
+}
+
+
+/* =========================================================
+   BACK LOGO WATERMARK
+   ========================================================= */
+
+.back-logo-watermark{
+  position:absolute;
+  inset:0;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  opacity:.22;
+  pointer-events:none;
+  z-index:1
+}
+
+.back-logo-watermark img{
+  width:80%;
+  height:75%;
+  object-fit:contain
+}
+
+
+/* =========================================================
+   FRONT
+   ========================================================= */
+
+.front{
+  padding:1mm 1mm 1.5mm;
+
+  display:flex;
+  flex-direction:column;
+
+  height:100%
+}
+
+
+/* =========================================================
+   COMPANY HEADER
+   ========================================================= */
+
+.org{
+  text-align:center;
+
+  position:relative;
+  z-index:2;
+
+  width:100%;
+
+  padding-top:.5mm;
+  padding-bottom:.8mm;
+
+  font-family:"Calibri",Arial,sans-serif
+}
+
+.logo{
+  height:11mm;
+  max-width:30mm;
+
+  object-fit:contain;
+
+  margin:0 auto 1.5mm;
+
+  display:block
+}
+
+
+/* =========================================================
+   ENGLISH COMPANY NAME
+   ========================================================= */
+
+.org-en{
+  font-family:"Calibri",Arial,sans-serif;
+
+  font-weight:950;
+  font-size:8.5px;
+  line-height:1.15;
+
+  letter-spacing:-.55px;
+
+  width:calc(100% + 4mm);
+  margin-left:-2mm;
+
+  white-space:nowrap;
+  overflow:visible;
+  text-overflow:clip;
+
+  text-shadow:
+    0 0 .35px currentColor,
+    0 0 .25px currentColor,
+    .15px 0 currentColor,
+    -.15px 0 currentColor;
+
+  transform:scaleX(1.38) scaleY(1.45);
+  transform-origin:center
+}
+
+
+/* =========================================================
+   HINDI COMPANY NAME
+   ========================================================= */
+
+.org-hi{
+  font-family:"Calibri","Noto Sans Devanagari",Arial,sans-serif;
+
+  font-weight:950;
+  font-size:11px;
+  line-height:1.05;
+
+  margin-top:2px;
+  margin-bottom:3px;
+
+  letter-spacing:-.5px;
+
+  width:100%;
+
+  white-space:nowrap;
+  overflow:visible;
+
+  text-align:center;
+
+  text-shadow:
+    0 0 .35px currentColor,
+    0 0 .25px currentColor,
+    .15px 0 currentColor,
+    -.15px 0 currentColor;
+
+  transform:scaleX(1.38);
+  transform-origin:center
+}
+
+
+/* =========================================================
+   GOVERNMENT LINES
+   ========================================================= */
+
+.org-sub{
+  font-family:"Calibri","Noto Sans Devanagari",Arial,sans-serif;
+
+  font-size:8.2px;
+  line-height:1.05;
+  font-weight:950;
+
+  margin-top:0;
+
+  width:calc(100% + 5mm);
+  margin-left:-2.5mm;
+
+  white-space:nowrap;
+  overflow:visible;
+
+  text-align:center;
+
+  letter-spacing:-.35px;
+
+  transform:scaleX(1.18);
+  transform-origin:center;
+
+  text-shadow:
+    0 0 .35px currentColor,
+    0 0 .2px currentColor,
+    .12px 0 currentColor,
+    -.12px 0 currentColor
+}
+
+
+/* =========================================================
+   FRONT PHOTO + DETAILS
+   ========================================================= */
+
+.front-main{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+
+  margin-top:1mm;
+
+  position:relative;
+  z-index:2;
+
+  padding:0 1.5mm
+}
+
+
+/* ORIGINAL PHOTO SIZE */
+
+.photo{
+  width:22mm;
+  height:25mm;
+
+  overflow:hidden;
+
+  background:#d8e5f2;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border:1px solid #000;
+
+  flex-shrink:0
+}
+
+.photo img{
+  width:100%;
+  height:100%;
+  object-fit:cover
+}
+
+
+/* DEFAULT AVATAR */
+
+.avatar{
+  width:55%;
+  height:55%;
+
+  position:relative;
+
+  opacity:.8
+}
+
+.avatar:before{
+  content:"";
+
+  position:absolute;
+
+  width:38%;
+  height:38%;
+
+  border-radius:50%;
+
+  background:#8ea0b8;
+
+  left:31%;
+  top:4%
+}
+
+.avatar:after{
+  content:"";
+
+  position:absolute;
+
+  width:72%;
+  height:47%;
+
+  border-radius:50% 50% 5% 5%;
+
+  background:#8ea0b8;
+
+  left:14%;
+  bottom:5%
+}
+
+.front-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1mm;
+  position: relative;
+  z-index: 2;
+  padding: 0 1.5mm;
+  /* Fills available height between header and signatures */
+  flex: 1 1 auto; 
+  min-height: 0;
+}
+/* =========================================================
+   EMPLOYEE DETAILS
+   ========================================================= */
+
+/*
+   No fixed height here.
+
+   This allows a long Name or Designation to use
+   the available vertical space naturally.
+*/
+
+.person {
+  width: 100%;
+  padding-top: 1.5mm;
+  /* Expands to fill available vertical space */
+  flex: 1 1 auto; 
+  display: flex;
+  flex-direction: column;
+  /* Distributes remaining height evenly between fieldlines */
+  justify-content: space-between; 
+  min-height: 0;
+}
+
+.front .person .fieldline {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 0.5mm;
+  align-items: baseline;
+  /* Removed fixed bottom margin so flex spacing handles gaps dynamically */
+  margin-bottom: 0;
+}
+
+.front .person .fieldline:last-child {
+  margin-bottom: 0;
+}
+
+
+
+
+/* LABEL */
+
+.front .person .label{
+  font-size:8px;
+
+  font-weight:800;
+
+  line-height:1.05;
+
+  color:#000;
+
+  white-space:nowrap;
+
+  display:block
+}
+
+
+/* VALUE */
+
+.front .person .value{
+   font-size:10.2px;
+  font-weight:900;
+  line-height:1.05;
+  color:#000;
+  min-width:0;
+  display:block;
+
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+
+
+/* =========================================================
+   SIGNATURE SECTION
+   ========================================================= */
+
+.signs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2mm;
+  /* Replaced negative margin with auto top margin to dock smoothly below details */
+  margin-top: auto; 
+  padding-top: 1mm;
+  padding-bottom: 1mm;
+  padding-left: 1.5mm;
+  padding-right: 1.5mm;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.sig-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 7mm; /* Tightened height for the image area */
+}
+
+.sig-box img {
+  max-height: 7mm;
+  max-width: 20mm;
+  object-fit: contain;
+  margin-bottom: 0.2mm;
+}
+
+.sigsub {
+  font-size: 7.5px;
+  margin-top: 1mm; /* Controls distance below the signature image */
+  line-height: 1.05;
+  font-weight: 900;
+  color: #000;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   SIGNATURE LABEL
+   ========================================================= */
+
+.sigsub{
+  font-size:7.5px;
+
+  margin-top:.5mm;
+
+  line-height:1.05;
+
+  font-weight:900;
+
+  color:#000;
+
+  white-space:nowrap
+}
+
+
+/* =========================================================
+   BACK
+   ========================================================= */
+
+.back{
+  padding:3mm 1mm 1.5mm;
+
+  display:flex;
+  flex-direction:column;
+
+  height:100%;
+
+  position:relative
+}
+
+
+/* =========================================================
+   BACK FIELDS
+   ========================================================= */
+
+.back-fields{
+  position:relative;
+  z-index:2;
+
+  display:flex;
+  flex-direction:column;
+
+  justify-content:flex-start;
+
+  padding:0 1mm
+}
+
+.back .fieldline{
+  display:block;
+
+  margin-bottom:1.2mm
+}
+
+.back .label{
+  font-size:7.2px;
+
+  font-weight:700;
+
+  line-height:1.05;
+
+  color:#000;
+
+  display:inline
+}
+
+.back .value{
+  font-size:8.8px;
+
+  font-weight:800;
+
+  line-height:1.05;
+
+  word-break:break-word;
+
+  color:#000;
+
+  display:inline
+}
+
+
+/* =========================================================
+   RETURN SECTION
+   ========================================================= */
+
+.return{
+  margin-top:auto;
+  padding-top:1mm;
+  text-align:center;
+  z-index:2;
+}
+
+.return h3{
+  margin:0 0 0.8mm;
+  font-size:10px;
+  line-height:1.05;
+  font-weight:950;
+  color:#000;
+}
+
+
+  .return .return-company{
+  margin:0 -2mm 0.8mm;
+  font-size:8px;
+  line-height:1.05;
+  font-weight:900;
+  color:#000;
+  white-space:nowrap;
+  overflow:visible;
+  text-align:center;
+  transform:scaleX(0.94);
+  transform-origin:center;
+}
+
+.return p{
+  margin:0;
+  font-size:6.8px;
+  line-height:1.25;
+  font-weight:700;
+  color:#000;
+}
+
+/* =========================================================
+   FIXED HEADER INFORMATION IN PANEL
+   ========================================================= */
+
+.fixed-header-box{
+  background:#f8fafc;
+
+  padding:10px;
+
+  border:1px solid #e2e8f0;
+
+  border-radius:6px;
+
+  font-size:11px;
+
+  line-height:1.4;
+
+  margin-bottom:10px;
+
+  color:#334155
+}
+
+.fixed-header-box div{
+  margin-bottom:2px
+}
+
+.fixed-header-box strong{
+  color:#000;
+
+  font-weight:800;
+
+  letter-spacing:.1px
+}
+
+
+/* =========================================================
+   NOTE
+   ========================================================= */
+
+.note{
+  font-size:11px;
+
+  color:#666;
+
+  margin-top:5px
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:900px){
+
+  .app{
+    grid-template-columns:1fr
+  }
+
+  .panel{
+    border-right:0;
+    border-bottom:1px solid #d8dde5
+  }
+
+  .cards{
+    gap:15px
+  }
+
+}
+
+
+/* =========================================================
+   PRINT
+   ========================================================= */
+
+@media print{
+
+  @page{
+    size:53.98mm 85.60mm;
+    margin:0
+  }
+
+  html,
+  body{
+    width:53.98mm;
+    height:85.60mm;
+
+    margin:0;
+
+    background:#fff
+  }
+
+  .app{
+    display:block;
+    min-height:0
+  }
+
+  .panel,
+  .instructions,
+  .sheet-title,
+  .note{
+    display:none!important
+  }
+
+  .stage{
+    display:block;
+    padding:0
+  }
+
+  .cards{
+    display:block
+  }
+
+  .sheet{
+    padding:0;
+    margin:0;
+
+    background:transparent;
+
+    box-shadow:none;
+
+    border-radius:0;
+
+    border:0;
+    outline:0
+  }
+
+  .sheet:nth-child(1){
+    break-after:page;
+    page-break-after:always
+  }
+
+  .sheet:nth-child(2){
+    break-after:auto;
+    page-break-after:auto
+  }
+
+  .card{
+    border:0;
+    outline:0;
+
+    width:53.98mm;
+    height:85.60mm;
+
+    background:#eaf3fa!important;
+
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact
+  }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="app">
+
+
+<!-- =========================================================
+     CONTROL PANEL
+     ========================================================= -->
+
+<aside class="panel">
+
+  <h1>CR80 ID Card Designer</h1>
+
+  <div class="sub">
+    Portrait CR80 • 53.98 × 85.60 mm • Front and back print separately
+  </div>
+
+
+  <h2>Company Header (Fixed)</h2>
+
+
+  <div class="fixed-header-box">
+
+    <div>
+      <strong>Company:</strong>
+      BRAHMAPUTRA CRACKER AND POLYMER LTD.
+    </div>
+
+    <div>
+      <strong>Govt. Line:</strong>
+      [A Govt. of India Enterprise]
+    </div>
+
+    <div>
+      <strong>Hindi Name:</strong>
+      ब्रह्मपुत्र क्रैकर एंड पॉलीमर लिमिटेड
+    </div>
+
+    <div>
+      <strong>Hindi Govt.:</strong>
+      (भारत सरकार का उपक्रम)
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       FRONT INPUTS
+       ======================================================= -->
+
+  <h2>Front side</h2>
+
+
+  <label>Photo</label>
+
+  <input
+    class="file"
+    id="photoFile"
+    type="file"
+    accept="image/*"
+  >
+
+
+  <div class="row">
+
+    <div>
+
+      <label>Name</label>
+
+      <input
+        id="name"
+        value="Employee Name"
+      >
+
+    </div>
+
+
+    <div>
+
+      <label>Designation</label>
+
+      <input
+        id="designation"
+        value="Designation"
+      >
+
+    </div>
+
+  </div>
+
+
+  <label>Employee No.</label>
+
+  <input
+    id="emp"
+    value="EMP-0001"
+  >
+
+
+  <label>Holder signature image</label>
+
+  <input
+    class="file"
+    id="holderSigFile"
+    type="file"
+    accept="image/*"
+  >
+
+
+  <label>Authority signature image</label>
+
+  <input
+    class="file"
+    id="authSigFile"
+    type="file"
+    accept="image/*"
+  >
+
+
+  <!-- =======================================================
+       BACK INPUTS
+       ======================================================= -->
+
+  <h2>Back side</h2>
+
+
+  <div class="row">
+
+    <div>
+
+      <label>Card No.</label>
+
+      <input
+        id="cardNo"
+        value="BCPL-000001"
+      >
+
+    </div>
+
+
+    <div>
+
+      <label>Blood group</label>
+
+      <input
+        id="blood"
+        value="O+"
+      >
+
+    </div>
+
+  </div>
+
+
+  <label>Date of birth</label>
+
+  <input
+    id="dob"
+    value="DD/MM/YYYY"
+  >
+
+
+  <label>Identification mark</label>
+
+  <input
+    id="idmark"
+    value="—"
+  >
+
+
+  <div class="row">
+
+    <div>
+
+      <label>Office phone</label>
+
+      <input
+        id="office"
+        value="+91-0000000000"
+      >
+
+    </div>
+
+
+    <div>
+
+      <label>Residence phone</label>
+
+      <input
+        id="res"
+        value="+91-0000000000"
+      >
+
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       BUTTONS
+       ======================================================= -->
+
+  <div class="btns">
+
+    <button
+      class="primary"
+      onclick="window.print()"
+    >
+      Print 2 Pages
+    </button>
+
+
+    <button
+      class="secondary"
+      onclick="resetForm()"
+    >
+      Reset
+    </button>
+
+  </div>
+
+
+  <div class="note">
+    Print with Scale = 100% / Actual Size.
+    Enable background graphics in print settings.
+  </div>
+
+</aside>
+
+
+<!-- =========================================================
+     PREVIEW
+     ========================================================= -->
+
+<main class="stage">
+
+
+  <div class="instructions">
+
+    <b>Print setup:</b>
+
+    choose your CR80/ID-card printer or a custom paper size of
+    <b>53.98 mm × 85.60 mm</b>.
+
+    Enable "Background graphics" in print options to retain
+    the light blue background color.
+
+  </div>
+
+
+  <div class="cards">
+
+
+    <!-- =====================================================
+         FRONT CARD
+         ===================================================== -->
+
+    <div class="sheet">
+
+      <div
+        id="front"
+        class="card front"
+      ></div>
+
+    </div>
+
+
+    <!-- =====================================================
+         BACK CARD
+         ===================================================== -->
+
+    <div class="sheet">
+
+      <div
+        id="back"
+        class="card back"
+      ></div>
+
+    </div>
+
+
+  </div>
+
+</main>
+
+</div>
+
+
+<script>
+
+
+/* =========================================================
+   FIXED COMPANY DATA
+   ========================================================= */
+
+const ORG_EN =
+  "BRAHMAPUTRA CRACKER AND POLYMER LTD.";
+
+const GOV_EN =
+  "[A Govt. of India Enterprise]";
+
+const ORG_HI =
+  "ब्रह्मपुत्र क्रैकर एंड पॉलीमर लिमिटेड";
+
+const GOV_HI =
+  "(भारत सरकार का उपक्रम)";
+
+
+/* =========================================================
+   SIGNATURE LABELS
+   ========================================================= */
+
+const HOLDER_SIG_TEXT =
+  "Holder's Signature";
+
+const AUTH_SIG_TEXT =
+  "Sign. of Issuing Authority";
+
+
+
+
+/* =========================================================
+   LOGO
+   ========================================================= */
+
+const LOGO_PATH =
+  "file:///C:/Users/rfiduser/Desktop/idcard/logo.png";
+
+
+/* =========================================================
+   IMAGE STATE
+   ========================================================= */
+
+let photoSrc = '';
+let holderSigSrc = '';
+let authSigSrc = '';
+
+
+/* =========================================================
+   INPUT IDS
+   ========================================================= */
+
+const ids = [
+  'name',
+  'designation',
+  'emp',
+  'cardNo',
+  'blood',
+  'dob',
+  'idmark',
+  'office',
+  'res'
+];
+
+
+const $ = id =>
+  document.getElementById(id);
+
+
+/* =========================================================
+   HTML ESCAPE
+   ========================================================= */
+
+function esc(v){
+
+  return String(v ?? '').replace(
+    /[&<>"']/g,
+    m => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#39;'
+    }[m])
+  );
+
+}
+
+
+/* =========================================================
+   UPDATE PREVIEW
+   ========================================================= */
+
+function update(){
+
+
+  const logo = `
+
+    <img
+      class="logo"
+      src="${esc(LOGO_PATH)}"
+      onerror="this.style.display='none'"
+    >
+
+  `;
+
+
+  /* =======================================================
+     FRONT
+     ======================================================= */
+
+  $('front').innerHTML = `
+
+
+    <div class="watermark">
+
+      ${
+        Array.from(
+          {length:240},
+          () => '<span>BCPL BCPL</span>'
+        ).join('')
+      }
+
+    </div>
+
+
+    <div class="org">
+
+      ${logo}
+
+
+      <div class="org-en">
+        ${ORG_EN}
+      </div>
+
+
+      <div class="org-sub">
+        ${GOV_EN}
+      </div>
+
+
+      <div class="org-hi">
+        ${ORG_HI}
+      </div>
+
+
+      <div class="org-sub">
+        ${GOV_HI}
+      </div>
+
+    </div>
+
+
+    <div class="front-main">
+
+
+      <div class="photo">
+
+        ${
+          photoSrc
+            ? `<img src="${photoSrc}">`
+            : '<div class="avatar"></div>'
+        }
+
+      </div>
+
+
+      <div class="person">
+
+
+        <div class="fieldline">
+
+          <div class="label">
+            नाम / NAME :
+          </div>
+
+          <div class="value">
+            ${esc($('name').value)}
+          </div>
+
+        </div>
+
+
+        <div class="fieldline">
+
+          <div class="label">
+            पदनाम / DESIGNATION :
+          </div>
+
+          <div class="value">
+            ${esc($('designation').value)}
+          </div>
+
+        </div>
+
+
+        <div class="fieldline">
+
+          <div class="label">
+            कर्मचारी संख्या / EMP NO. :
+          </div>
+
+          <div class="value">
+            ${esc($('emp').value)}
+          </div>
+
+        </div>
+
+
+      </div>
+
+    </div>
+
+
+    <!-- SIGNATURES -->
+
+    <div class="signs">
+
+
+      <div>
+
+        <div class="sig-box">
+
+          ${
+            holderSigSrc
+              ? `<img src="${holderSigSrc}">`
+              : ''
+          }
+
+        </div>
+
+
+        <div class="sigsub">
+          ${esc(HOLDER_SIG_TEXT)}
+        </div>
+
+      </div>
+
+
+      <div>
+
+        <div class="sig-box">
+
+          ${
+            authSigSrc
+              ? `<img src="${authSigSrc}">`
+              : ''
+          }
+
+        </div>
+
+
+        <div class="sigsub">
+          ${esc(AUTH_SIG_TEXT)}
+        </div>
+
+      </div>
+
+
+    </div>
+
+  `;
+
+
+  /* =======================================================
+     BACK
+     ======================================================= */
+
+  $('back').innerHTML = `
+
+
+    <div class="back-logo-watermark">
+
+      <img
+        src="${esc(LOGO_PATH)}"
+        onerror="this.style.display='none'"
+      >
+
+    </div>
+
+
+    <div class="back-fields">
+
+
+      <div class="fieldline">
+
+        <div class="label">
+          आईडी कार्ड संख्या / ID CARD NO. :
+        </div>
+
+        <div class="value">
+          ${esc($('cardNo').value)}
+        </div>
+
+      </div>
+
+
+      <div class="fieldline">
+
+        <div class="label">
+          ब्लड ग्रुप / BLOOD GROUP :
+        </div>
+
+        <div class="value">
+          ${esc($('blood').value)}
+        </div>
+
+      </div>
+
+
+      <div class="fieldline">
+
+        <div class="label">
+          जन्म तिथि / DATE OF BIRTH :
+        </div>
+
+        <div class="value">
+          ${esc($('dob').value)}
+        </div>
+
+      </div>
+
+
+      <div class="fieldline">
+
+        <div class="label">
+          पहचान चिन्ह / IDENTIFICATION MARK :
+        </div>
+
+        <div class="value">
+          ${esc($('idmark').value)}
+        </div>
+
+      </div>
+
+
+      <div class="fieldline">
+
+        <div class="label">
+          कार्यालय फोन / OFFICE PHONE :
+        </div>
+
+        <div class="value">
+          ${esc($('office').value)}
+        </div>
+
+      </div>
+
+
+      <div class="fieldline">
+
+        <div class="label">
+          आवासीय फोन / RESIDENCE PHONE :
+        </div>
+
+        <div class="value">
+          ${esc($('res').value)}
+        </div>
+
+      </div>
+
+
+    </div>
+
+
+    <div class="return">
+      <h3>If found, Please return to:</h3>
+
+  <div class="return-company">
+    BRAHMAPUTRA CRACKER AND POLYMER LTD.
+  </div>
+
+  <p>
+    Security Department, Administrative Building,<br>
+    PO-Lepetkata,<br>
+    Dibrugarh, Assam. PIN-786006<br>
+    Contact No.: 6900182935<br>
+    Emailsecurity.dept@bcplindia.co.in
+  </p>
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   LIVE INPUT
+   ========================================================= */
+
+ids.forEach(id => {
+
+  $(id).addEventListener(
+    'input',
+    update
+  );
+
+});
+
+
+/* =========================================================
+   IMAGE READER
+   ========================================================= */
+
+function readImage(file,cb){
+
+  if(!file)return;
+
+  const reader =
+    new FileReader();
+
+  reader.onload =
+    () => cb(reader.result);
+
+  reader.readAsDataURL(file);
+
+}
+
+
+/* =========================================================
+   PHOTO UPLOAD
+   ========================================================= */
+
+$('photoFile').addEventListener(
+  'change',
+  e => {
+
+    readImage(
+      e.target.files[0],
+      src => {
+
+        photoSrc = src;
+
+        update();
+
+      }
+    );
+
+  }
+);
+
+
+/* =========================================================
+   HOLDER SIGNATURE
+   ========================================================= */
+
+$('holderSigFile').addEventListener(
+  'change',
+  e => {
+
+    readImage(
+      e.target.files[0],
+      src => {
+
+        holderSigSrc = src;
+
+        update();
+
+      }
+    );
+
+  }
+);
+
+
+/* =========================================================
+   AUTHORITY SIGNATURE
+   ========================================================= */
+
+$('authSigFile').addEventListener(
+  'change',
+  e => {
+
+    readImage(
+      e.target.files[0],
+      src => {
+
+        authSigSrc = src;
+
+        update();
+
+      }
+    );
+
+  }
+);
+
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+function resetForm(){
+
+  if(
+    confirm('Reset all fields?')
+  ){
+
+    location.reload();
+
+  }
+
+}
+
+
+/* =========================================================
+   INITIAL RENDER
+   ========================================================= */
+
+update();
+
+</script>
+
+</body>
+</html>
